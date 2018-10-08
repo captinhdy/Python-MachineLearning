@@ -4,6 +4,7 @@ import requests
 import matplotlib.pyplot as plt
 from pprint import pprint
 import json
+import csv
 
 class StockAnalyzer:
 
@@ -22,9 +23,9 @@ class StockAnalyzer:
         ti = TechIndicators(key=self.alphaVantage_Appid, output_format='pandas')
         data, meta_data = ts.get_intraday(symbol=Ticker,interval='1min',  outputsize='full')
         indicators, indicator_metadata = ti.get_sma(symbol=Ticker,interval='1min', time_period=100, series_type='close')
-        #data['close'].plot()
+        data['close'].plot()
         #indicators.plot()
-        #plt.show()
+        plt.show()
 
         latest = len(data)-1
         iLatest = len(indicators)-1
@@ -42,5 +43,21 @@ class StockAnalyzer:
         pprint(t)
         #response = requests.get('')
 
+    def GetStockSymbols(self):
+        response = requests.get(url='https://api.iextrading.com/1.0/ref-data/symbols')
+        t = json.loads(response.text)
+        with open("symbols.csv", "wb") as csv_file:
+            csv_file = csv.writer(csv_file)
+            for item in t:
+                csv_file.writerow(item.values())
+
     def GetStockNews(self, Ticker):
         print('not implemented')
+
+    def GetStockHistory(self, symbol, length):
+        response = requests.get(url='https://api.iextrading.com/1.0/stock/' + symbol + '/chart/' + length)
+        t = json.loads(response.text)
+        with open("history.csv", "ab") as csv_file:
+            csv_file = csv.writer(csv_file)
+            for item in t:
+                csv_file.writerow(item.values())
